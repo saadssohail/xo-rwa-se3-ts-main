@@ -22,7 +22,7 @@ describe('App', () => {
     expect(urlLoader.loadUrlTextAndLinks).toHaveBeenCalledTimes(1)
     expect(urlLoader.loadUrlTextAndLinks).toHaveBeenCalledWith(DEFAULT_URL)
     expect(console.log).toHaveBeenCalledTimes(1)
-    expect(console.log).toHaveBeenCalledWith('Found 0 instances of \'kayako\' in the body of the page')
+    expect(console.log).toHaveBeenCalledWith('Found 0 instances of \'kayako\' at level 2 of the page: https://www.kayako.com')
   })
 
   it('should call url loader and return count when word present', async () => {
@@ -35,9 +35,9 @@ describe('App', () => {
 
     // then
     expect(urlLoader.loadUrlTextAndLinks).toHaveBeenCalledTimes(1)
-    expect(urlLoader.loadUrlTextAndLinks).toHaveBeenCalledWith('https://www.kayako.com/')
+    expect(urlLoader.loadUrlTextAndLinks).toHaveBeenCalledWith('https://www.kayako.com')
     expect(console.log).toHaveBeenCalledTimes(1)
-    expect(console.log).toHaveBeenCalledWith('Found 2 instances of \'kayako\' in the body of the page')
+    expect(console.log).toHaveBeenCalledWith('Found 2 instances of \'kayako\' at level 2 of the page: https://www.kayako.com')
   })
 
   it('should return default URL when no url passed', async () => {
@@ -45,12 +45,36 @@ describe('App', () => {
     const appParameters = app.parseCli(['node', 'main.js'])
 
     // then
-    expect(appParameters.url).toBe('https://www.kayako.com/')
+    expect(appParameters.url).toBe('https://www.kayako.com')
   })
 
   it('should return specified URL', async () => {
     const url = 'https://www.google.com/'
     expect(app.parseCli(['node', 'main.js', '--url', url]).url).toBe(url)
     expect(app.parseCli(['node', 'main.js', '-u', url]).url).toBe(url)
+  })
+
+  it('should not process URLs beyond specified depth', async () => {
+    // Given
+    const appParameters = app.parseCli(['node', 'main.js', '--depth', '1'])
+    urlLoader.loadUrlTextAndLinks.mockResolvedValueOnce({ text: '', links: ['https://www.kayako.com/about'] })
+      .mockResolvedValue({ text: 'kayako text', links: ['https://www.kayako.com/about/page-2'] })
+
+    // When
+    await app.process(appParameters)
+
+    // Then
+    expect(urlLoader.loadUrlTextAndLinks).toHaveBeenCalledTimes(2) // Only the first level is processed
+  })
+
+  it('should not process unrelated URLs', async () => {
+    // Given
+    urlLoader.loadUrlTextAndLinks.mockResolvedValue({ text: '', links: ['https://www.test.com/about'] })
+
+    // When
+    await app.run()
+
+    // Then
+    expect(urlLoader.loadUrlTextAndLinks).toHaveBeenCalledTimes(1) // Only the first level is processed
   })
 })
