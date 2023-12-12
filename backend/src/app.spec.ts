@@ -22,7 +22,7 @@ describe('App', () => {
     expect(urlLoader.loadUrlTextAndLinks).toHaveBeenCalledTimes(1)
     expect(urlLoader.loadUrlTextAndLinks).toHaveBeenCalledWith(DEFAULT_URL)
     expect(console.log).toHaveBeenCalledTimes(1)
-    expect(console.log).toHaveBeenCalledWith('Found 0 instances of \'kayako\' in the body of the page')
+    expect(console.log).toHaveBeenCalledWith('Found 0 instances of \'kayako\' at level 2 of the page: https://www.kayako.com')
   })
 
   it('should call url loader and return count when word present', async () => {
@@ -35,9 +35,9 @@ describe('App', () => {
 
     // then
     expect(urlLoader.loadUrlTextAndLinks).toHaveBeenCalledTimes(1)
-    expect(urlLoader.loadUrlTextAndLinks).toHaveBeenCalledWith('https://www.kayako.com/')
+    expect(urlLoader.loadUrlTextAndLinks).toHaveBeenCalledWith('https://www.kayako.com')
     expect(console.log).toHaveBeenCalledTimes(1)
-    expect(console.log).toHaveBeenCalledWith('Found 2 instances of \'kayako\' in the body of the page')
+    expect(console.log).toHaveBeenCalledWith('Found 2 instances of \'kayako\' at level 2 of the page: https://www.kayako.com')
   })
 
   it('should return default URL when no url passed', async () => {
@@ -45,7 +45,7 @@ describe('App', () => {
     const appParameters = app.parseCli(['node', 'main.js'])
 
     // then
-    expect(appParameters.url).toBe('https://www.kayako.com/')
+    expect(appParameters.url).toBe('https://www.kayako.com')
   })
 
   it('should return specified URL', async () => {
