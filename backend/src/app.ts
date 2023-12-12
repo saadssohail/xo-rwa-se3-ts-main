@@ -30,15 +30,8 @@ export class App {
     const queue: Array<{ url: string, level: number }> = [{ url: formattedBaseUrl, level: 0 }]
 
     while (queue.length > 0) {
-      const dequeued = queue.shift()
-
-      if (dequeued == null) {
-        continue
-      }
-
-      const { url, level } = dequeued
-
-      if (level > appParameters.depth || visited.has(url)) continue
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const { url, level } = queue.shift()!
 
       visited.add(url)
       const { text, links } = await this.urlLoader.loadUrlTextAndLinks(url)

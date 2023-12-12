@@ -53,4 +53,16 @@ describe('App', () => {
     expect(app.parseCli(['node', 'main.js', '--url', url]).url).toBe(url)
     expect(app.parseCli(['node', 'main.js', '-u', url]).url).toBe(url)
   })
+
+  it('should not process URLs beyond specified depth', async () => {
+    // Given
+    urlLoader.loadUrlTextAndLinks.mockResolvedValueOnce({ text: '', links: ['https://www.kayako.com/about'] })
+      .mockResolvedValue({ text: 'kayako text', links: [] })
+
+    // When
+    await app.run()
+
+    // Then
+    expect(urlLoader.loadUrlTextAndLinks).toHaveBeenCalledTimes(2) // Only the first level is processed
+  })
 })
