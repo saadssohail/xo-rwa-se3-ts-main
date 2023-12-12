@@ -56,13 +56,25 @@ describe('App', () => {
 
   it('should not process URLs beyond specified depth', async () => {
     // Given
+    const appParameters = app.parseCli(['node', 'main.js', '--depth', '1'])
     urlLoader.loadUrlTextAndLinks.mockResolvedValueOnce({ text: '', links: ['https://www.kayako.com/about'] })
-      .mockResolvedValue({ text: 'kayako text', links: [] })
+      .mockResolvedValue({ text: 'kayako text', links: ['https://www.kayako.com/about/page-2'] })
+
+    // When
+    await app.process(appParameters)
+
+    // Then
+    expect(urlLoader.loadUrlTextAndLinks).toHaveBeenCalledTimes(2) // Only the first level is processed
+  })
+
+  it('should not process unrelated URLs', async () => {
+    // Given
+    urlLoader.loadUrlTextAndLinks.mockResolvedValue({ text: '', links: ['https://www.test.com/about'] })
 
     // When
     await app.run()
 
     // Then
-    expect(urlLoader.loadUrlTextAndLinks).toHaveBeenCalledTimes(2) // Only the first level is processed
+    expect(urlLoader.loadUrlTextAndLinks).toHaveBeenCalledTimes(1) // Only the first level is processed
   })
 })

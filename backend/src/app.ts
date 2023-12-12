@@ -31,17 +31,19 @@ export class App {
 
     while (queue.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const { url, level } = queue.shift()!
+      const dequeued = queue.shift()!
+
+      const { url, level } = dequeued
+
+      // Assuming that we can skip links that are not from the base-site
+      if (visited.has(url) || !url.includes(appParameters.url)) continue
 
       visited.add(url)
       const { text, links } = await this.urlLoader.loadUrlTextAndLinks(url)
       count += (text.toLocaleLowerCase().match(new RegExp(appParameters.word, 'ig')) ?? []).length
       if (level < appParameters.depth) {
         links.forEach(link => {
-          const formattedUrl = this.formatUrl(link)
-          if (!visited.has(formattedUrl) && formattedUrl.includes(appParameters.url)) {
-            queue.push({ url: formattedUrl, level: level + 1 })
-          }
+          queue.push({ url: this.formatUrl(link), level: level + 1 })
         })
       }
     }
